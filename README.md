@@ -12,7 +12,7 @@ The following **required** functionality is completed:
 
 * [x] Connect the app with the Instagram API and get real time data using async-http-client library.
 * [x] Show the last 2 comments for each photo.
-* [] WIP: User can view all comments for a post within a separate activity.
+* [X] User can view all comments for a post within a separate activity.
 * [] WIP: User can share an image to their friends or email to themselves.
 
 The following **optional** features are implemented:
