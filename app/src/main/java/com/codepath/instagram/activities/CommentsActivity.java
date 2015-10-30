@@ -1,6 +1,5 @@
 package com.codepath.instagram.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,53 +7,49 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.codepath.instagram.R;
 import com.codepath.instagram.helpers.Utils;
-//import com.codepath.instagram.models.InstagramClient;
 import com.codepath.instagram.models.InstagramClient;
-import com.codepath.instagram.models.InstagramPost;
+import com.codepath.instagram.models.InstagramComment;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-
 import org.json.JSONObject;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-
-public class HomeActivity extends AppCompatActivity {
-    private static final String TAG = "HomeActivity";
-    ArrayList<InstagramPost> allPosts = new ArrayList<InstagramPost>() ;
-    InstagramPostsAdapter adapter;
+public class CommentsActivity extends AppCompatActivity {
+    RecyclerView rvComments;
+    ArrayList<InstagramComment> allComments = new ArrayList<InstagramComment>();
+    InstagramCommentsAdapter commandAdapter;
+    String mediaId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fresco.initialize(this);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_comments);
 
-        RecyclerView rvPosts = (RecyclerView) findViewById(R.id.rvPosts);
+        mediaId = getIntent().getStringExtra("MediaId");
+
+        rvComments = (RecyclerView) findViewById(R.id.rvComments);
 
         fetchPost();
-        adapter = new InstagramPostsAdapter(allPosts, this);
+        commandAdapter = new InstagramCommentsAdapter(allComments, this);
 
-        // create adapter
-        rvPosts.setAdapter(adapter);
+        rvComments.setAdapter(commandAdapter);
 
-        // set adapter
-        rvPosts.setLayoutManager(new LinearLayoutManager(this));
+        rvComments.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home, menu);
+        getMenuInflater().inflate(R.menu.menu_comments, menu);
         return true;
     }
 
@@ -73,26 +68,25 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void fetchPost() {
+    private void fetchPost() {
 
         try {
-            InstagramClient.getPopularFeed(new JsonHttpResponseHandler() {
+            InstagramClient.getCommentsFeed(mediaId, new JsonHttpResponseHandler() {
                 @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                allPosts.addAll(Utils.decodePostsFromJsonResponse(response));
-                    adapter.notifyDataSetChanged();
-            }
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    allComments.addAll(Utils.decodeCommentsFromJsonResponse(response));
+                    commandAdapter.notifyDataSetChanged();
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                try {
-                    Log.e("getPoularFeed", "OnFailure", t);
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                    // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                    try {
+                        Log.e("getPoularFeed", "OnFailure", t);
+                    } catch (Throwable e) {
+                        Log.e("Error", e.getMessage());
+                    }
                 }
-                catch (Throwable e) {
-                    Log.e("Error", e.getMessage());
-                }
-            }
             });
         }
         catch (Throwable e) {
